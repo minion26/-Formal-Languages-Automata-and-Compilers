@@ -1,0 +1,12 @@
+global_begin
+int d;
+global_end
+int a;
+int b;
+int c;
+main_begin
+a=2;
+b=3;
+c=a+b;
+d=b++;
+main_end
