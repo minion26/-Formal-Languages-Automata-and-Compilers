@@ -1,12 +1,59 @@
 global_begin
-int d;
+    int a = 1;
+    string s = "Hello World";
+    bool b = true;
+    int c;
 global_end
-int a;
-int b;
-int c;
+func_begin
+    int f1(int a, int b)
+        {   
+            int c;
+        }
+    int f2()
+    {
+        int d;
+    }
+
+    struct s1
+    {
+        int a;
+        int b;
+    };
+
+    struct s2
+    {
+        int a;
+        int b;
+    }didi;
+
+func_end
 main_begin
-a=2;
-b=3;
-c=a+b;
-d=b++;
+    int b = 3;
+    float f=1.2;
+    int z = 2+3;
+
+    f2();
+    f1(1,2);
+
+    print("f are valoarea:", f);
+
+    for(int i=0; i<10; i=i+1)
+    {
+        print("i are valoarea:", i);
+    };
+
+    while(z<10)
+    {
+        print("z are valoarea:", z);
+        z=z+1;
+    };
+
+    if (true || false){
+        a++;
+    }else{
+        a--;
+    };
+
+    bool k = true;
+    
 main_end

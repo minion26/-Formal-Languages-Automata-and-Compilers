@@ -1,0 +1,10 @@
+Nume 	 Tip 	 Valoare 	 Scope 	 Array? 	 DimensiuneArray 
+a 		 int 		 1 		 global 		 0 		 0
+s 		 string 		 "Hello World" 		 global 		 0 		 0
+b 		 bool 		 true 		 global 		 0 		 0
+c 		 int 		 NULL 		 global 		 0 		 0
+c 		 int 		 NULL 		 main 		 0 		 0
+d 		 int 		 NULL 		 main 		 0 		 0
+b 		 int 		 3 		 main 		 0 		 0
+f 		 float 		 1.2 		 main 		 0 		 0
+k 		 bool 		 true 		 main 		 0 		 0
