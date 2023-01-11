@@ -5,6 +5,13 @@
 
 extern int yylineno;
 
+struct lv { // structura ce retine informatii despre un left value
+          char name[50];
+          char type[50];
+          char value[50];
+          char scope[50];
+};
+
 struct Variabila{
     char numeVar[100];
     char tipVar[50];
@@ -66,7 +73,8 @@ int searchVar(char* nume, char* scope){
         if (i == variabilaCount) return 0; //nu l-am gasit = not declared
         //l-am gasit, verificam daca si scope-ul e identic, atunci id-ul e declarat deja
         else if (strcmp(var[i].scopeVar, scope) == 0) return 1; 
-            else i++; //avem un id cu acelasi nume, dar scope-ul e diferit
+            //else if(var[i].isArray == array && var[i].arraySize == size) return 1;
+                else i++; //avem un id cu acelasi nume, dar scope-ul e diferit
     }
     return 0;
 }
@@ -145,3 +153,91 @@ void addFunc(char* nume, char* tip, int nrParametrii, struct parametru* lista, c
     }
 }
 
+char* checkTypeOfValue(char* value){
+    //verific daca valoarea este de tip int, float, char, string
+    if (value[0] == '\''){
+        return "char";
+    }
+    if (value[0] == '"'){
+        return "string";
+    }
+    if (strchr(value, '.') != NULL){
+        return "float";
+    }
+    if (strcmp(value, "true") == 0 || strcmp(value, "false") == 0){
+        return "bool";
+    }
+    return "int";
+}
+
+struct lv* getVarTypeAndValue(char* nume, char* scope){
+    int i = 0;
+    //printf("[HEADER] sunt in functie %d, %d\n", i, variabilaCount);
+    while (i < variabilaCount){
+        if ( strcmp(var[i].numeVar, nume) == 0 && strcmp(var[i].scopeVar, scope) == 0){
+
+           struct lv* lrVal;
+           lrVal = (struct lv*)malloc(sizeof(struct lv));
+            
+           strcpy(lrVal->type, var[i].tipVar);
+           strcpy(lrVal->value, var[i].valoareVar);
+           strcpy(lrVal->scope, var[i].scopeVar);
+           strcpy(lrVal->name, var[i].numeVar);
+           
+           return lrVal;
+           
+        }
+        i++;
+    }
+    saveTable();
+    if(strcmp(scope, "const") != 0)
+    {
+        printf("Variabila %s e constanta si nu poate fi modificata! (linia %d)\n", nume, yylineno);
+        exit(1);
+    }
+    printf("[HEADER]Variabila %s nu exista! (linia %d)\n", nume, yylineno);
+    exit(1);
+}
+
+char* getType(char* nume, char* scope){
+    int i = 0;
+    while (i < variabilaCount){
+        // printf("sunt in typeof\n");
+        if ( strcmp(var[i].numeVar, nume) == 0 && strcmp(var[i].scopeVar, scope) == 0){
+            return var[i].tipVar;
+        }
+        i++;
+    }
+    saveTable();
+    printf("Variabila %s nu exista! (linia %d)\n", nume, yylineno);
+    exit(1);
+}
+
+char* getTypeFunc(char* nume, struct parametru* lista, int nrParametrii)
+{
+    int i = 0;
+    while (i < functieCount)
+    {
+        while ((strcmp(func[i].numeFunctie, nume) != 0) && (i < functieCount)) i++;
+
+        if (i == functieCount){
+            saveTable();
+            printf("Variabila %s nu exista! (linia %d)\n", nume, yylineno);
+            exit(1);
+        }
+        else if (func[i].nrParametrii == nrParametrii){
+            int allAreTheSame = 1;
+            for (int j = 0; j < nrParametrii; j++){
+                if (strcmp(func[i].lista_parametrii[j].tipParametru, lista[j].tipParametru) != 0){
+                    allAreTheSame = 0;
+                    break;
+                }
+            }
+            if (allAreTheSame == 1) return func[i].tipFunctie;
+            else i++;
+        }
+    }
+    saveTable();
+    printf("Variabila %s nu exista! (linia %d)\n", nume, yylineno);
+    exit(1);
+}

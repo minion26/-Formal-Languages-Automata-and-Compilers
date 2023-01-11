@@ -14,12 +14,12 @@ struct parametrii { // structura ce retine parametrii unei functii
           char name[50];
      };
 
-     struct lv { // structura ce retine informatii despre un left value
-          char name[50];
-          char type[50];
-          char value[50];
-          char scope[50];
-     };
+     // struct lv { // structura ce retine informatii despre un left value
+     //      char name[50];
+     //      char type[50];
+     //      char value[50];
+     //      char scope[50];
+     // };
 
      enum node_types {operator, numar, identifcator, array}; // enumeratie ce retine tipurile de noduri din arborele AST: operator, numar, id, array, other
 
@@ -50,7 +50,7 @@ extern FILE* functieTabel;
 
 %token MAIN_BEGIN MAIN_END GLOBAL_BEGIN GLOBAL_END 
      ASSIGN IF ELSE WHILE FOR FUNC_BEGIN FUNC_END PRINT LOGIC
-     STRUCT_BEGIN STRUCT_END STRUCT
+     STRUCT_BEGIN STRUCT_END STRUCT TYPEOF RETURN CONST
 
 %token <strval>ID
 %token <strval>TIP
@@ -91,17 +91,24 @@ global_var : global_var_types
           | global_var global_var_types
           ;
 global_var_types : TIP ID ';' {addVar($2, $1, "NULL", "global", 0, 0);}
-               | TIP ID ASSIGN rvalue ';' {
-                    
-                    addVar($2, $1, $4->value, "global", 0, 0);}
+               | TIP ID ASSIGN rvalue ';' 
+               {
+                    addVar($2, $1, $4->value, "global", 0, 0);
+               }
                | TIP ID ASSIGN math_statement ';'
                | TIP ARRAY ';' {
                     char* numeArray = strtok($2, "[]"); 
+                    // printf("nume array: %s \n", numeArray);
                     char* indexArray = strtok(NULL, "[]");
+                    // printf("index array: %s \n", indexArray);
                     int index = atoi(indexArray);
+                    // printf("index array int : %d \n", index);
+                    addVar(numeArray, $1, "NULL", "global", 1, index);     
 
-                    addVar(numeArray, $1, NULL, "global", 1, index);     
-
+               }
+               | CONST TIP ID ASSIGN rvalue ';'
+               {
+                    addVar($3, "const", $5->value, "global", 0, 0);
                }
                ;
 
@@ -120,12 +127,35 @@ functii_type : TIP ID functie_decl
                     // parametrii = 0;
                }
           ;
-functie_decl : '(' ')' '{' list '}' { $$ = NULL;}
-               | '(' lista_param ')' '{' list '}' 
+functie_decl : '(' ')' '{' body_function retur '}' { $$ = NULL;}
+               | '(' lista_param ')' '{' body_function retur '}' 
                { 
                     // $$ = $2;
                }
           ;
+body_function : body_function body_function_types
+               | body_function_types
+               ;
+body_function_types : TIP ID ';'
+                    {
+                         addVar($2, $1, "NULL", "func", 0, 0);
+                    }
+               | TIP ID ASSIGN rvalue ';'
+                    {
+                         addVar($2, $1, $4->value, "func", 0, 0);
+                    }
+               | TIP ID ASSIGN math_statement ';'
+               | TIP ARRAY ';'
+                    {
+                         char* numeArray = strtok($2, "[]"); 
+                         char* indexArray = strtok(NULL, "[]");
+                         int index = atoi(indexArray);
+                         addVar(numeArray, $1, "NULL", "func", 1, index);     
+
+                    }
+               ;
+retur : RETURN rvalue ';'
+     ;
 lista_param : param
                // {
                //      strcpy($$[parametrii].type, $1.type);
@@ -153,11 +183,7 @@ param : TIP ID
           // }
       ; 
 
-// struct_section: STRUCT_BEGIN struct STRUCT_END
-//                ;
-// struct : struct_declarations
-//      | struct struct_declarations
-     // ;
+
 struct_declarations : STRUCT ID '{' body_structure '}' ID ';' 
                     {
                          addFunc($2, "struct", 0, 0, "struct");
@@ -171,9 +197,30 @@ body_structure: body_structure_types
                | body_structure body_structure_types
                ;
 body_structure_types : TIP ID ';'
+                    {
+                         addVar($2, $1, "NULL", "struct", 0, 0);
+                    }
                     | TIP ID ASSIGN rvalue ';'
+                    {
+                         addVar($2, $1, $4->value, "struct", 0, 0);
+                    }
                     | TIP ID ASSIGN math_statement ';'
                     | TIP ARRAY ';'
+                    {
+                         char* numeArray = strtok($2, "[]"); 
+                         char* indexArray = strtok(NULL, "[]");
+                         int index = atoi(indexArray);
+                         addVar(numeArray, $1, "NULL", "struct", 1, index);     
+
+                    }
+                    // | TIP ARRAY ASSIGN rvalue ';'
+                    // {
+                    //      char* numeArray = strtok($2, "[]"); 
+                    //      char* indexArray = strtok(NULL, "[]");
+                    //      int index = atoi(indexArray);
+                    //      addVar(numeArray, $1, $5->value, "struct", 1, index);     
+
+                    // }
                     ;
 /* bloc */
 bloc : MAIN_BEGIN  list MAIN_END 
@@ -188,67 +235,92 @@ list :  statement ';'
      | list control ';'
      | deal_struct ';'
      | list deal_struct ';'
+     | typeof ';'
+     | list typeof ';'
      ;
 
 /* instructiune */
 statement : lvalue ASSIGN rvalue 
      {
-          // if(strcmp($1->type, $3->type) == 0){
-          //      if($3->value != NULL){
-          //           updateVar($1->name, $3->value, "main");
-          //      }
-          // }else{
-          //      saveTable();
-          //      printf("Id %s type %s does not match %s type %s! (line %d)\n", $1->name, $1->type, $3->name, $3->type, yylineno);
-          //      exit(1);
-          // }
+          printf("[DEBUG]type ul lui lvalue %s este %s \n", $1->name, $1->type);
+          printf("[DEBUG]incerc sa actualizez valoarea lui %s cu %s \n", $1->name, $3->value);
+          if(strcmp($1->type, $3->type) == 0){
+               if(strcmp($3->value, "NULL") != 0){
+                    updateVar($1->name, $3->value, "main");
+               }
+          }else{
+               saveTable();
+               printf("Tipul %s variabilei %s nu este acelasi cu %s tipul %s! (line %d)\n", $1->name, $1->type, $3->name, $3->type, yylineno);
+               exit(1);
+          }
    
      }
          | lvalue ASSIGN math_statement
          | ID '(' lista_apel ')'
          | ID '(' ')'
          {
-               // if (!searchFunc($1, NULL, 0)){
-               //      saveTable();
-               //      printf("Function %s does not exist or the number of parametrs are wrong! (line %d)\n", $1, yylineno);
-               //      exit(1);
-               // }
+               if (!searchFunc($1, NULL, 0)){
+                    saveTable();
+                    printf("Functia %s nu exista sau numarul de parametrii este gresit! (line %d)\n", $1, yylineno);
+                    exit(1);
+               }
          }
          | print_functie
          | lvalue inc_dec_op
          {
-          printf("type %s\n", $1->type);
-          // if (strcmp($1->type, "int") == 0) {
-          //           int result=atoi($1->value);
-          //           printf("result %d\n", result);
-          //           if(strcmp($2,"--")==0){
-          //                sprintf($1->value,"%d",--result);
-          //           }
-          //           else{
-          //                sprintf($1->value,"%d",++result);
-          //           }   
+          printf("[INC_DEC_OP]%s has type %s\n", $1->name, $1->type);
+          if (strcmp($1->type, "int") == 0) {
+                    int result=atoi($1->value);
+                    if(strcmp($2,"--")==0){
+                         sprintf($1->value,"%d",--result);
+                    }
+                    else{
+                         sprintf($1->value,"%d",++result);
+                    }   
+                    printf("[INC_DEC_OP]result %d\n", result);
 
-          //           updateVar($1->name, $1->value, $1->scope);
+                    updateVar($1->name, $1->value, $1->scope);
 
-          //           }
+                    }
 
-          // else
-          // {
-          //      printf("Cannot increment/decrement a non integer type value. (line %d)\n", yylineno);
-          // }
+          else
+          {
+               printf("[INC_DEC_OP]Numai valori de tip int pot fi incrementate/decrementate. (line %d)\n", yylineno);
+               exit(1);
           }
-         
+          }
          ;
+
+typeof : TYPEOF '(' ID  ')'
+     {
+          // printf("sunt in match\n");
+          if (!searchVar($3, "main") && !searchVar($3, "global")){
+               
+               printf("[TYPE OF]Variabila %s nu exista! (line %d)\n", $3, yylineno);
+               exit(1);
+          }
+          else{
+               char* type = getType($3, "main");
+               if (type == NULL){
+                    type = getType($3, "global");
+               }
+               printf("[TYPE OF]Type of %s is %s\n", $3, type);
+          }
+          
+     }
+     ;
 
 declaratie : TIP ID 
           {
+               printf("[DEBUG]id %s are type %s\n", $2,$1);
                addVar($2, $1, "NULL", "main", 0,0);
           }
           | TIP ID ASSIGN rvalue
           {
+               printf("[DEBUG]id %s are type %s\n", $2,$1);
                if (strcmp($1, $4->type) != 0) {
                     saveTable();
-                    printf("Id %s type does not match %s type! (line %d)\n", $2, $4->name, yylineno);
+                    printf("Tipul variabilei %s nu este acelasi cu tipul variabile %s ! (line %d)\n", $2, $4->name, yylineno);
                     exit(1);
                }
                addVar($2, $1, $4->value, "main", 0,0);
@@ -262,9 +334,16 @@ declaratie : TIP ID
 
                addVar(numeArray, $1, NULL, "global", 1, index);
           }
+          | CONST TIP ID ASSIGN rvalue
+               {
+                    addVar($3, "const", $5->value, "global", 0, 0);
+               }
           ;
 
 lvalue : ID
+     {
+          $$ = (struct lvalue*)getVarTypeAndValue($1, "main");
+     }
      | ARRAY
      ;
 
@@ -282,7 +361,14 @@ lista_apel : rvalue
            ;
 
 print_functie : PRINT '(' STRING ',' rvalue ')'
+               {
+                    printf("[COMPILER] %s %s\n", $3, $5->value);
+               }
              | PRINT '(' STRING  ',' math_statement')'
+             | PRINT '(' STRING ')'
+             {
+                    printf("[COMPILER] %s\n", $3);
+             }
              ;
 
 inc_dec_op : INC

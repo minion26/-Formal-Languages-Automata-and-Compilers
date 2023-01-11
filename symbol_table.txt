@@ -3,8 +3,19 @@ a 		 int 		 1 		 global 		 0 		 0
 s 		 string 		 "Hello World" 		 global 		 0 		 0
 b 		 bool 		 true 		 global 		 0 		 0
 c 		 int 		 NULL 		 global 		 0 		 0
-c 		 int 		 NULL 		 main 		 0 		 0
-d 		 int 		 NULL 		 main 		 0 		 0
-b 		 int 		 3 		 main 		 0 		 0
+arr 		 int 		 NULL 		 global 		 1 		 10
+con 		 const 		 9 		 global 		 0 		 0
+c 		 int 		 4 		 func 		 0 		 0
+d 		 int 		 NULL 		 func 		 1 		 50
+s1a 		 int 		 NULL 		 struct 		 0 		 0
+s1b 		 int 		 NULL 		 struct 		 1 		 10
+s2a 		 int 		 5 		 struct 		 0 		 0
+s2b 		 int 		 NULL 		 struct 		 0 		 0
+b 		 int 		 2 		 main 		 0 		 0
 f 		 float 		 1.2 		 main 		 0 		 0
+z 		 int 		 2 		 main 		 0 		 0
+a 		 int 		 10 		 main 		 0 		 0
+str 		 string 		 "Hello World2222" 		 main 		 0 		 0
+i 		 int 		 0 		 main 		 0 		 0
 k 		 bool 		 true 		 main 		 0 		 0
+xon 		 const 		 10 		 global 		 0 		 0

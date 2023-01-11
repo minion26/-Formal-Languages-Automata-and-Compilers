@@ -23,6 +23,8 @@ MATH1 "+"|"-"
 MATH2 "*"|"/"
 %option noyywrap
 %%
+"return" {return RETURN;}
+"const" {return CONST;}
 {IF} {return IF;}
 {ELSE} {return ELSE;}
 {FOR} {return FOR;}
@@ -39,6 +41,7 @@ MATH2 "*"|"/"
 "stuct_end" {return STRUCT_END;}
 "main_begin" {return MAIN_BEGIN;}
 "main_end" {return MAIN_END;}
+"typeOf" {return TYPEOF;}
 
 {BOOL} {yylval.strval = strdup(yytext); return BOOL;}
 
