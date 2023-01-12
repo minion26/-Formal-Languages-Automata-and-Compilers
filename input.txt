@@ -6,6 +6,7 @@ global_begin
     int arr[10];
     const int con = 9;
 global_end
+
 func_begin
     int f1(int a, int b)
     {   
@@ -13,10 +14,22 @@ func_begin
         return 1;
     }
 
-    int f2()
+    float f2()
     {
         int d[50];
         return 0;
+    }
+
+    bool f3()
+    {
+        int b1;
+        return 1;
+    }
+
+    string f4()
+    {
+        int b;
+        return "Hello World";
     }
 
     struct s1
@@ -32,11 +45,17 @@ func_begin
     }didi;
 
 func_end
+
 main_begin
     int b = 3;
     b=2;
+
     float f=1.2;
+    f=2.3;
+
     int z = 2;
+    z++;
+
     int a = 10;
 
     typeOf(b);
@@ -70,8 +89,8 @@ main_begin
 
     bool k = true;
 
-    const int xon = 10;
+    const int xon = 1;
     
-    print("alala");
+    print("Hello World");
 
 main_end

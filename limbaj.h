@@ -241,3 +241,4 @@ char* getTypeFunc(char* nume, struct parametru* lista, int nrParametrii)
     printf("Variabila %s nu exista! (linia %d)\n", nume, yylineno);
     exit(1);
 }
+

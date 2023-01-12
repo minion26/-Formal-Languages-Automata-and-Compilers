@@ -1,5 +1,7 @@
 Nume 	 Return 	 Tip 	 ListaParametrii 
 f1 	 	 int 		 functie 		
-f2 	 	 int 		 functie 		
+f2 	 	 float 		 functie 		
+f3 	 	 bool 		 functie 		
+f4 	 	 string 		 functie 		
 s1 	 	 struct 		 struct 		
 s2 	 	 struct 		 struct 		
